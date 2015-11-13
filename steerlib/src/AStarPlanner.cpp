@@ -162,18 +162,41 @@ namespace SteerLib
 		points.push_back(Util::Point(i + 1, 0, j - 1));		// bottom left	6
 		points.push_back(Util::Point(i + 1, 0, j + 1));		// bottom right	7
 
-		for (int i = 0; i < points.size(); i++) {
-			//if (!canBeTraversed(gSpatialDatabase->getCellIndexFromLocation(points[i])))
-			//	continue;
+		if (canBeTraversed(gSpatialDatabase->getCellIndexFromLocation(points[i])))
+		{
+			for (int i = 0; i < points.size(); i++) {
+				//if (!canBeTraversed(gSpatialDatabase->getCellIndexFromLocation(points[i])))
+					//continue;
 
-			if (i < 4)
-				neighbors.push_back(createNeighbor(points[i], goal, curr, true));
-			else
-				neighbors.push_back(createNeighbor(points[i], goal, curr, false));
+				if (i < 4)
+					neighbors.push_back(createNeighbor(points[i], goal, curr, true));
+				else
+					neighbors.push_back(createNeighbor(points[i], goal, curr, false));
+			}
 		}
 
 		return neighbors;
 	}
+
+	
+
+	std::vector<Util::Point> AStarPlanner::pathReconstruct(std::vector<SteerLib::AStarPlannerNode>& cameFrom, SteerLib::AStarPlannerNode curr)
+	{
+		std::vector<Util::Point> totalPath;
+		totalPath.push_back(curr.point);
+		int n = 0;
+		while (n < cameFrom.size())
+		{
+			curr = cameFrom[n];
+			totalPath.push_back(curr.point);
+			n++;
+		}
+
+		return totalPath;
+	}
+	
+
+
 
 	bool AStarPlanner::computePath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path)
 	{
@@ -190,9 +213,9 @@ namespace SteerLib
 		// f = g + h
 		double start_g = 0;
 		double start_h = Heuristic(start, goal);
-		//double start_f = start_g + start_h;
-		double start_f = 0;
+		double start_f = start_g + start_h;
 		SteerLib::AStarPlannerNode startnode(start, start_g, start_h, start_f, nullptr);
+		
 
 		printf("\n************\nGoal Node: <%f, %f, %f>\n", goal.x, goal.y, goal.z);
 		printf("Start Node: <%f, %f, %f>\n", startnode.point.x, startnode.point.y, startnode.point.z);
@@ -216,6 +239,9 @@ namespace SteerLib
 			printf("************\n");
 
 			if (curr.point == goal) {
+				//TODO
+				//RECONSTRUCT PATH HERE
+				agent_path = pathReconstruct(camefrom, curr);
 				printf("\n************\n");
 				printf("GOOOAL\n");
 				printf("************\n");
@@ -253,6 +279,26 @@ namespace SteerLib
 					continue;
 				}
 
+				double tentativeg = curr.g + distanceBetween(curr.point, neighbors[i].point);
+
+				
+				if (tentativeg < neighbors[i].g)
+				{
+					printf("Curr in came from\n");
+					camefrom.push_back(curr);
+					printf("tentative g in neighbors g\n");
+					neighbors[i].g = tentativeg;
+					printf("new f value in neighbor\n");
+					neighbors[i].f = neighbors[i].g + Heuristic(neighbors[i].point, goal);
+
+					if (!(std::find(openset.begin(), openset.end(), neighbors[i]) != openset.end())) {
+						printf("Not in openset...new node here\n");
+						printf("Adding neighbor to openset\n");
+						openset.push_back(neighbors[i]);
+					}
+				}
+				
+				/*
 				// might have to use heuristic for distanceBetween
 				double tentativeg = curr.g + distanceBetween(curr.point, neighbors[i].point);
 
@@ -267,6 +313,11 @@ namespace SteerLib
 					continue;
 				}
 
+				camefrom[i] = curr;
+				neighbors[i].g = tentativeg;
+				neighbors[i].f = neighbors[i].g + Heuristic(neighbors[i].point, goal);
+
+				*/
 			}
 			printf("************\n");
 
