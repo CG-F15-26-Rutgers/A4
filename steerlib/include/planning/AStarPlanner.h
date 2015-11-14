@@ -117,7 +117,7 @@ namespace SteerLib
 		int locateSmallestFPos(std::vector<SteerLib::AStarPlannerNode> openset);
 		std::vector<SteerLib::AStarPlannerNode> getNeighbors(std::vector<SteerLib::AStarPlannerNode> neighbors, SteerLib::AStarPlannerNode curr, Util::Point start, Util::Point goal);
 		SteerLib::AStarPlannerNode createNeighbor(Util::Point point, Util::Point goal, SteerLib::AStarPlannerNode curr, bool dpad);
-		std::vector<Util::Point> pathReconstruct(std::vector<SteerLib::AStarPlannerNode>& cameFrom, SteerLib::AStarPlannerNode curr);
+		std::vector<Util::Point> pathReconstruct(std::map<int, int>& cameFrom, int currID, Util::Point start);
 
 	private:
 		SteerLib::GridDatabase2D * gSpatialDatabase;

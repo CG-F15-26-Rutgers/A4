@@ -24,7 +24,20 @@
 
 // 1 for Manhattan
 // 2 for Euclidean
-#define HEURISTIC 1
+#define HEURISTIC 2
+
+//Set to true for part 3
+#define PART_3 false
+#define DJDIAG 2
+
+//Set to true for part 4
+#define PART_4 false
+#define H_1 2
+#define H_2 4
+#define H_3 8
+
+
+
 
 namespace SteerLib
 {
@@ -126,10 +139,23 @@ namespace SteerLib
 		}
 		else {
 			printf("DIAGONAL curr g: %f\n", curr.g);
-			g = sqrt(2) + curr.g;
+			g = 1 + curr.g;
+
+			if (PART_3)
+			{
+				g = DJDIAG + curr.g;
+			}
 		}
 
 		// Heuristic is point to goal
+		//If part 4, increase the heuristic cost by 2, 4, or 8 respectively 
+		if (PART_4)
+		{
+			//Change H_1 to either: H_2 or H_3 for inflated` heuristic
+			h = H_1 * Heuristic(point, goal);
+		}
+
+		//If not part 4, heurstic as normal
 		h = Heuristic(point, goal);
 
 		f = g + h;
@@ -180,18 +206,20 @@ namespace SteerLib
 
 	
 
-	std::vector<Util::Point> AStarPlanner::pathReconstruct(std::vector<SteerLib::AStarPlannerNode>& cameFrom, SteerLib::AStarPlannerNode curr)
+	std::vector<Util::Point> AStarPlanner::pathReconstruct(std::map<int, int>& cameFrom, int currID, Util::Point start)
 	{
 		std::vector<Util::Point> totalPath;
-		totalPath.push_back(curr.point);
-		int n = 0;
-		while (n < cameFrom.size())
+		int bruh = currID;
+		int startIndex = gSpatialDatabase->getCellIndexFromLocation(start);
+		while (bruh != startIndex)
 		{
-			curr = cameFrom[n];
-			totalPath.push_back(curr.point);
-			n++;
+			totalPath.insert(totalPath.begin(), getPointFromGridIndex(bruh));
+			bruh = cameFrom[bruh];
 		}
 
+		//Because it breaks the loop and doesn't add the last point
+		//So it adds that last point here
+		totalPath.insert(totalPath.begin(), getPointFromGridIndex(bruh));
 		return totalPath;
 	}
 	
@@ -205,7 +233,8 @@ namespace SteerLib
 		//TODO
 		//std::cout << "\nIn A*";
 
-		std::vector<SteerLib::AStarPlannerNode> openset, closedset, camefrom, neighbors;
+		std::vector<SteerLib::AStarPlannerNode> openset, closedset, neighbors;
+		std::map<int, int> cameFrom;
 
 		// AStarPlannerNode(Util::Point _point, double _g, double _f, AStarPlannerNode* _parent)
 		// g = move cost --> parent g + diagonal/dpad
@@ -241,7 +270,9 @@ namespace SteerLib
 			if (curr.point == goal) {
 				//TODO
 				//RECONSTRUCT PATH HERE
-				agent_path = pathReconstruct(camefrom, curr);
+
+				int currID = gSpatialDatabase->getCellIndexFromLocation(curr.point);
+				agent_path = pathReconstruct(cameFrom, currID, startnode.point);
 				printf("\n************\n");
 				printf("GOOOAL\n");
 				printf("************\n");
@@ -279,13 +310,14 @@ namespace SteerLib
 					continue;
 				}
 
-				double tentativeg = curr.g + distanceBetween(curr.point, neighbors[i].point);
+				//double tentativeg = curr.g + distanceBetween(curr.point, neighbors[i].point);
 
-				
+				/*
 				if (tentativeg < neighbors[i].g)
 				{
 					printf("Curr in came from\n");
-					camefrom.push_back(curr);
+					cameFrom[i] = gSpatialDatabase->getCellIndexFromLocation(curr.point);
+					//camefrom.push_back(curr);
 					printf("tentative g in neighbors g\n");
 					neighbors[i].g = tentativeg;
 					printf("new f value in neighbor\n");
@@ -298,7 +330,7 @@ namespace SteerLib
 					}
 				}
 				
-				/*
+				*/
 				// might have to use heuristic for distanceBetween
 				double tentativeg = curr.g + distanceBetween(curr.point, neighbors[i].point);
 
@@ -313,11 +345,11 @@ namespace SteerLib
 					continue;
 				}
 
-				camefrom[i] = curr;
+				cameFrom[i] = gSpatialDatabase->getCellIndexFromLocation(curr.point);
 				neighbors[i].g = tentativeg;
 				neighbors[i].f = neighbors[i].g + Heuristic(neighbors[i].point, goal);
 
-				*/
+				
 			}
 			printf("************\n");
 
