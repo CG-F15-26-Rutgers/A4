@@ -30,6 +30,7 @@
 #define PART_3 false
 #define DJDIAG 2
 
+
 //Set to true for part 4
 #define PART_4 false
 #define H_1 2
