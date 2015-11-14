@@ -99,25 +99,13 @@ namespace SteerLib
 
 		bool computePath(std::vector<Util::Point>& agent_path, Util::Point start, Util::Point goal, SteerLib::GridDatabase2D * _gSpatialDatabase, bool append_to_path = false);
 
-		/*
-		float ManhattanDistance(Util::Point a, Util::Point b);
-		float EuclideanDistance(Util::Point a, Util::Point b);
-		float ChooseHeuristic(Util::Point a, Util::Point b);
-
-		std::vector <SteerLib::AStarPlannerNode> getNeighbors(std::vector<SteerLib::AStarPlannerNode> neighbors, SteerLib::AStarPlannerNode curr, Util::Point start, Util::Point goal);
-		SteerLib::AStarPlannerNode createNeighbor(Util::Point point, SteerLib::AStarPlannerNode curr, bool dpad);
-		int getSmallestFValue(std::vector<SteerLib::AStarPlannerNode> set);
-		std::vector<SteerLib::AStarPlannerNode> reconstructPath(std::vector<SteerLib::AStarPlannerNode> camefrom, AStarPlannerNode curr);
-		bool checkNeighbor(std::vector<SteerLib::AStarPlannerNode> neighbors, SteerLib::AStarPlannerNode point);
-		*/
-
 		double Heuristic(Util::Point start, Util::Point goal);
 		double Manhattan(Util::Point a, Util::Point b);
 		double Euclidean(Util::Point a, Util::Point b);
 		int locateSmallestFPos(std::vector<SteerLib::AStarPlannerNode> openset);
-		std::vector<SteerLib::AStarPlannerNode> getNeighbors(std::vector<SteerLib::AStarPlannerNode> neighbors, SteerLib::AStarPlannerNode curr, Util::Point start, Util::Point goal);
+		std::vector<SteerLib::AStarPlannerNode> getNeighbors(SteerLib::AStarPlannerNode curr, Util::Point start, Util::Point goal);
 		SteerLib::AStarPlannerNode createNeighbor(Util::Point point, Util::Point goal, SteerLib::AStarPlannerNode curr, bool dpad);
-		std::vector<Util::Point> pathReconstruct(std::map<int, int>& cameFrom, int currID, Util::Point start);
+		std::vector<Util::Point> pathReconstruct(std::vector<Util::Point>& cameFrom, int currID, Util::Point start);
 
 	private:
 		SteerLib::GridDatabase2D * gSpatialDatabase;
